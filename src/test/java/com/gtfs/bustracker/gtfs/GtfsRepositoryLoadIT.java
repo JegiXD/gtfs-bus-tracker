@@ -19,12 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Integration test that exercises {@link GtfsRepository} against the real,
- * unmodified GTFS feed bundled under src/test/resources/gtfs-fixture (the
- * same feed provided with the assignment) - real file I/O, real CSV
- * quirks (BOM, CRLF line endings), no mocking.
- */
+/** Preveri nalaganje testnih datotek GTFS, tudi posebnosti zapisa CSV. */
 class GtfsRepositoryLoadIT {
 
     private Path gtfsDir;
@@ -55,7 +50,7 @@ class GtfsRepositoryLoadIT {
         GtfsRepository repo = GtfsRepository.loadForStop(gtfsDir, 2);
 
         assertFalse(repo.getStopTimesAtStop().isEmpty());
-        // Every trip referenced by a kept stop_time row must be resolvable.
+        // Vsak prihod mora imeti pripadajočo vožnjo.
         for (StopTimeEntry entry : repo.getStopTimesAtStop()) {
             assertTrue(repo.getTripsById().containsKey(entry.getTripId()),
                     "trip " + entry.getTripId() + " should have been loaded from trips.txt");
@@ -64,7 +59,7 @@ class GtfsRepositoryLoadIT {
 
     @Test
     void onlyKeepsRoutesReachableFromTheRequestedStop() {
-        // Per the raw feed, stop 2 is only ever served by routes 101, 106 and 107.
+        // Na postajališču 2 ustavljajo samo linije 101, 106 in 107.
         GtfsRepository repo = GtfsRepository.loadForStop(gtfsDir, 2);
 
         Set<String> routeIds = repo.getRoutesById().values().stream()
@@ -73,8 +68,8 @@ class GtfsRepositoryLoadIT {
 
         assertEquals(Set.of("101", "106", "107"), routeIds);
 
-        // And every trip kept in memory must belong to one of those routes -
-        // i.e. we never pulled in unrelated trips/routes from elsewhere in the feed.
+        // Shranjene vožnje morajo pripadati tem linijam.
+        // Nepovezanih voženj in linij ne shranjujemo.
         for (TripInfo trip : repo.getTripsById().values()) {
             assertTrue(routeIds.contains(trip.getRouteId()));
         }

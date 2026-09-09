@@ -1,6 +1,6 @@
 package com.gtfs.bustracker.gtfs;
 
-/** Thrown when GTFS data cannot be loaded or is inconsistent/unusable. */
+/** Napaka pri branju ali vsebini podatkov GTFS. */
 public class GtfsDataException extends RuntimeException {
 
     public GtfsDataException(String message) {

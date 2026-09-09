@@ -1,109 +1,103 @@
 # GTFS sledilnik avtobusov
 
-Majhna Java aplikacija, ki prebere statični GTFS-vir in izpiše naslednje
-prihode avtobusov na izbrano postajališče v naslednjih dveh urah, združene
-po linijah.
+Java aplikacija, ki iz voznega reda v obliki GTFS prebere prihode avtobusov
+na izbrano postajališče v naslednjih dveh urah. Prihode izpiše po linijah.
+Uporablja shranjeni vozni red, ne podatkov o dejanskem položaju avtobusov.
+
+## Hiter zagon
+
+Potrebuješ **JDK 17 ali novejši** in **Maven**. V mapi projekta zaženi:
+
+```bash
+mvn package
+java -jar target/gtfs-bus-tracker.jar 2 2 relative
+```
+
+Primer prikaže največ dva prihoda na linijo za postajališče `2`, čas pa
+izpiše v minutah do prihoda. Brez argumentov program uporabi iste nastavitve.
 
 ## Uporaba
 
 ```text
-busTrips <številka_postajališča> <število_avtobusov_na_linijo> <relative|absolute>
+java -jar target/gtfs-bus-tracker.jar <postajališče> <število_prihodov> <relative|absolute>
 ```
 
-- `station_id` (int) - GTFS `stop_id` postajališča.
-- `num_buses_per_line` (int) - največje število prihodov na linijo.
-- `relative|absolute` - `absolute` izpiše uro (`12:10`), `relative` pa čas
-  do prihoda (`10min`).
+- `postajališče`: celoštevilski ID postajališča (`stop_id` iz `stops.txt`).
+- `število_prihodov`: največ prihodov na linijo; mora biti večje od nič.
+- `relative`: čas do prihoda, npr. `10min`; `absolute`: ura prihoda, npr. `12:10`.
 
-Primer po gradnji:
+Na konec ukaza lahko dodaš:
 
-```bash
-GTFS_DATA_DIR=gtfs-data java -jar target/gtfs-bus-tracker.jar 2 2 relative
-```
+- `--gtfs <mapa>`: pot do GTFS-podatkov. Sicer se uporabi `GTFS_DATA_DIR`,
+  če je nastavljen, ali privzeta mapa `gtfs-data`.
+- `--at <yyyy-MM-ddTHH:mm[:ss]>`: čas poizvedbe za preizkušanje.
+  Brez te možnosti se uporabi trenutni čas.
 
-Program podpira tudi dve dodatni zastavici, ki omogočata lažji zagon in
-preizkušanje brez spreminjanja kode:
-
-- `--gtfs <mapa>` - mapa z datotekami `stops.txt`, `stop_times.txt`,
-  `trips.txt`, `routes.txt` in po želji `calendar.txt`. Privzeto je
-  uporabljena mapa `./gtfs-data`, oziroma vrednost spremenljivke okolja
-  `GTFS_DATA_DIR`.
-- `--at <yyyy-MM-ddTHH:mm[:ss]>` - določitev časa poizvedbe namesto
-  trenutnega sistemskega časa.
-
-Če program zaženemo brez argumentov, uporabi privzeto postajališče `2`,
-prikaže dva prihoda na linijo in uporabi relativni zapis časa.
-
-Primer za postajališče 2:
+Primer z določenim datumom in časom:
 
 ```bash
 java -jar target/gtfs-bus-tracker.jar 2 2 relative \
   --gtfs gtfs-data --at 2026-09-09T10:00:00
 ```
 
-```text
-Upcoming buses at AL Masjid Al-nabawi (Clock Roundabout) (stop 2)
-Query time: 2026-09-09 10:00 | next 2h
-107: 1min, 10min
-101: 8min, 10min
-106: 10min, 11min
-```
+Primer vrstice izpisa: `107: 1min, 10min` pomeni, da avtobusa linije 107
+po voznem redu prideta čez 1 in 10 minut.
 
-## Gradnja in zagon
+## Podatki in omejitve
 
-Potrebujemo JDK 17 ali novejši in Maven.
+GTFS-mapa mora vsebovati `stops.txt`, `stop_times.txt`, `trips.txt` in
+`routes.txt`. Datoteka `calendar.txt` določa dneve voženj; če manjka,
+program šteje, da vse vožnje veljajo vsak dan. Izjem iz `calendar_dates.txt`
+(npr. praznikov) ne upošteva.
 
-```bash
-mvn package
-java -jar target/gtfs-bus-tracker.jar 2 2 relative \
-  --gtfs gtfs-data --at 2026-09-09T10:00:00
-```
+V priloženem `gtfs-data/calendar.txt` je veljavnost voznega reda za
+preizkušanje prestavljena s 15. 2.–15. 5. 2020 na 1. 1.–31. 12. 2026.
+To ni posodobitev dejanskega voznega reda. Testni podatki ohranjajo prvotne datume.
+
+Večji datoteki se bereta po vrsticah, shranijo pa se le podatki za izbrano
+postajališče. Program upošteva tudi GTFS-čase nad `24:00:00`, ki označujejo
+vožnje po polnoči iz prejšnjega dne.
 
 ## Testi
 
+Enotski testi preverijo posamezne dele programa:
+
 ```bash
-mvn test          # enotski testi
-mvn verify        # enotski in integracijski testi
+mvn test
 ```
 
-- **Enotski testi** (`*Test.java`) preverjajo razčlenjevanje GTFS-časov,
-  CSV-datotek, algoritem prihodov in oblikovanje izpisa brez dostopa do
-  datotek.
-- **Integracijski testi** (`*IT.java`) preverjajo delo z datotekami in celoten
-  zagon CLI-programa nad testnim GTFS-virom v
-  `src/test/resources/gtfs-fixture`.
+Vsi testi, vključno z branjem datotek in celotnim zagonom:
 
-## Opomba o zasnovi
+```bash
+mvn verify
+```
 
-Uporabljene so datoteke `stops.txt`, `stop_times.txt`, `trips.txt`,
-`routes.txt` in po želji `calendar.txt`. Datoteka `calendar_dates.txt` ni
-uporabljena, ker so GTFS-izjeme in prazniki izven obsega projekta. Če
-`calendar.txt` manjka, se vse storitve obravnavajo kot aktivne.
+Ukaze zaženi v terminalu v mapi projekta. V polje **Run** pri Mavenovi
+konfiguraciji v IntelliJ IDEA vpiši samo `test` ali `verify`, brez `mvn`
+in brez dodatnega besedila.
 
-Največji datoteki, `stop_times.txt` in `trips.txt`, se bereta vrstico po
-vrstici. V pomnilniku se obdržijo samo podatki, povezani z izbranim
-postajališčem, zato poraba pomnilnika ni odvisna od celotne velikosti vira.
+## Predlogi za zahtevnejšo nalogo
 
-GTFS dovoljuje čase, večje od `24:00:00`, za vožnje po polnoči, ki še vedno
-pripadajo storitvi prejšnjega dne. `NextArrivalsService` zato pri iskanju
-prihodov preveri današnji in včerajšnji dan.
-
-## Avtorsko delo in pomoč pri programiranju
-
-Glavne elemente projekta sem izdelal sam in samostojno prišel do rešitve.
-Pri pisanju in oblikovanju kode sem si pomagal z AI-orodjem, pri čemer sem
-končne odločitve, strukturo projekta in pravilnost rešitve preveril sam.
+- Upoštevanje praznikov in izjem iz `calendar_dates.txt`.
+- Podpora časovnim pasovom prevoznikov in premiku ure.
+- Prikaz zamud in odpovedi s podatki GTFS Realtime.
+- Iskanje poti med postajališči s prestopanji.
+- Merjenje hitrosti in porabe pomnilnika na velikih GTFS-virih.
 
 ## Struktura projekta
 
 ```text
 src/main/java/com/gtfs/bustracker/
-  Main.java                     vstopna točka CLI-programa
-  model/                        podatkovni modeli
-  gtfs/                         nalaganje GTFS-datotek
-  service/                      glavna logika in oblikovanje izpisa
-  util/                         razčlenjevanje GTFS-časov in CSV-ja
-src/test/java/com/gtfs/bustracker/   enotski in integracijski testi
-src/test/resources/gtfs-fixture/     testni GTFS-vir
-gtfs-data/                            privzeti GTFS-vir za zagon
+  Main.java     zagon in argumenti
+  model/        podatkovni razredi
+  gtfs/         branje GTFS-datotek
+  service/      iskanje prihodov in izpis
+  util/         obdelava časov in CSV-ja
+src/test/       testi in testni podatki
+gtfs-data/      priloženi vozni red
 ```
+
+## Avtorstvo
+
+Glavne dele projekta in rešitev sem izdelal sam. Pri pisanju in oblikovanju
+kode sem si pomagal z AI-orodjem, končne odločitve in pravilnost pa preveril sam.

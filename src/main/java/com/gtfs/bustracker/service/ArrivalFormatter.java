@@ -8,11 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Renders {@link RouteArrivals} into the human-readable lines the CLI
- * prints, in either "absolute" (e.g. 12:10) or "relative" (e.g. 10min) time
- * format.
- */
+/** Oblikuje izpis prihodov kot uro (12:10) ali čas do prihoda (10min). */
 public final class ArrivalFormatter {
 
     public enum TimeFormat {

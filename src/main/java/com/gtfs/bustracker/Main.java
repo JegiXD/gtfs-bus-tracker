@@ -130,7 +130,7 @@ public final class Main {
                 + "[--gtfs <dir>] [--at <yyyy-MM-ddTHH:mm>]";
     }
 
-    /** Raised for bad CLI input; kept internal since Main handles it directly. */
+    /** Napaka pri argumentih programa. */
     private static final class UsageException extends RuntimeException {
         UsageException(String message) {
             super(message);

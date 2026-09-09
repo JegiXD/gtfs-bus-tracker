@@ -18,17 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Loads only the slice of a GTFS feed that is relevant to answering "next
- * arrivals" queries for ONE specific stop.
- *
- * <p>Memory strategy: the feed's largest files (stop_times.txt, trips.txt)
- * are streamed line-by-line and immediately filtered - a row is only kept
- * in memory if it is reachable from the requested stop_id. routes.txt and
- * calendar.txt are then filtered down to just the route/service ids that
- * survived that first pass. Nothing about stops other than the requested
- * one, or trips that never call at it, is ever retained.</p>
- */
+/** Naloži podatke GTFS za izbrano postajališče. Velike datoteke bere po vrsticah in shrani le povezane podatke. */
 public final class GtfsRepository {
 
     private final Stop stop;
@@ -50,11 +40,8 @@ public final class GtfsRepository {
     }
 
     /**
-     * Loads and filters the GTFS feed located in {@code gtfsDir} for the
-     * given stop id.
-     *
-     * @throws GtfsDataException if required files are missing/unreadable,
-     *                            or the stop id does not exist in stops.txt
+     * Naloži podatke iz mape gtfsDir za izbrano postajališče.
+     * @throws GtfsDataException če datotek ni mogoče prebrati ali postajališče ne obstaja
      */
     public static GtfsRepository loadForStop(Path gtfsDir, int stopId) {
         Stop stop = loadStop(gtfsDir, stopId);
@@ -112,13 +99,13 @@ public final class GtfsRepository {
                 String tripId = row.get("trip_id");
                 String arrival = row.get("arrival_time");
                 if (tripId == null || arrival == null) {
-                    return; // malformed row - skip defensively
+                    return; // Preskoči neveljavno vrstico.
                 }
                 int arrivalSeconds;
                 try {
                     arrivalSeconds = GtfsTimeUtil.parseToSecondsOfDay(arrival);
                 } catch (IllegalArgumentException e) {
-                    return; // skip rows with unparsable times rather than fail the whole load
+                    return; // Preskoči vrstico z neveljavnim časom.
                 }
                 String seqStr = row.get("stop_sequence");
                 int sequence = seqStr != null ? safeParseInt(seqStr, 0) : 0;
@@ -176,11 +163,7 @@ public final class GtfsRepository {
         return routes;
     }
 
-    /**
-     * calendar.txt is optional per the assignment; if it is absent, every
-     * service id referenced by a relevant trip is treated as active every
-     * day (calendar_dates.txt exceptions are out of scope here).
-     */
+    /** Brez calendar.txt veljajo vse vožnje vsak dan. Izjem iz calendar_dates.txt ne upošteva. */
     private static Map<String, ServiceCalendar> loadCalendars(Path gtfsDir, Set<String> neededServiceIds) {
         Map<String, ServiceCalendar> calendars = new HashMap<>();
         Path file = gtfsDir.resolve("calendar.txt");
@@ -243,11 +226,7 @@ public final class GtfsRepository {
         }
     }
 
-    /**
-     * Builds a repository directly from in-memory data, bypassing file I/O.
-     * Intended for unit tests that want to exercise {@code NextArrivalsService}
-     * against hand-crafted fixtures without touching the filesystem.
-     */
+    /** Ustvari zbirko iz podatkov v pomnilniku za teste brez branja datotek. */
     public static GtfsRepository forData(Stop stop,
                                           List<StopTimeEntry> stopTimesAtStop,
                                           Map<String, TripInfo> tripsById,
@@ -276,12 +255,7 @@ public final class GtfsRepository {
         return calendarsByServiceId;
     }
 
-    /**
-     * Whether the given service id is active on the given date. If no
-     * calendar entry exists for the service (either calendar.txt was
-     * absent, or the service id was unlisted), it is conservatively treated
-     * as active - this matches the "calendar.txt is optional" contract.
-     */
+    /** Preveri veljavnost voznega reda na dani datum. Brez zapisa v koledarju velja vsak dan. */
     public boolean isServiceActiveOn(String serviceId, LocalDate date) {
         ServiceCalendar cal = calendarsByServiceId.get(serviceId);
         if (cal == null) {

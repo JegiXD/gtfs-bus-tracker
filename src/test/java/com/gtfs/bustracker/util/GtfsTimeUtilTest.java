@@ -14,7 +14,7 @@ class GtfsTimeUtilTest {
             "00:00:00, 0",
             "08:15:00, 29700",
             "23:59:59, 86399",
-            // GTFS allows times past midnight belonging to the previous service day
+            // Časi po polnoči lahko pripadajo voznemu redu prejšnjega dne.
             "24:00:00, 86400",
             "25:30:00, 91800",
     })

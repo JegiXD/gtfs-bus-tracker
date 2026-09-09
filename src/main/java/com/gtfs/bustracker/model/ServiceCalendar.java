@@ -3,14 +3,11 @@ package com.gtfs.bustracker.model;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
-/**
- * Minimal representation of a GTFS calendar.txt row: on which days of the
- * week, and within which date range, a service_id operates.
- */
+/** Dnevi v tednu in obdobje veljavnosti voznega reda iz calendar.txt. */
 public final class ServiceCalendar {
 
     private final String serviceId;
-    private final boolean[] daysActive; // index 0 = Monday ... 6 = Sunday
+    private final boolean[] daysActive; // Indeksi: 0 = ponedeljek, 6 = nedelja.
     private final LocalDate startDate;
     private final LocalDate endDate;
 
@@ -28,11 +25,7 @@ public final class ServiceCalendar {
         return serviceId;
     }
 
-    /**
-     * Whether this service operates on the given calendar date, i.e. the
-     * date falls within [startDate, endDate] and the matching weekday flag
-     * is set.
-     */
+    /** Preveri, ali datum in dan v tednu ustrezata voznemu redu. */
     public boolean isActiveOn(LocalDate date) {
         if (date.isBefore(startDate) || date.isAfter(endDate)) {
             return false;

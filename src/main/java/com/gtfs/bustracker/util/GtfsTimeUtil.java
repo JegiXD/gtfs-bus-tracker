@@ -1,22 +1,14 @@
 package com.gtfs.bustracker.util;
 
-/**
- * Helpers for GTFS's slightly unusual time format: "HH:MM:SS" where HH may
- * legally go beyond 23 (e.g. "25:30:00") to represent a time after midnight
- * that still belongs to the previous day's service/trip block.
- */
+/** Obdeluje čase GTFS, tudi ure nad 23 za vožnje po polnoči. */
 public final class GtfsTimeUtil {
 
     private GtfsTimeUtil() {
     }
 
     /**
-     * Parses a GTFS time string such as "08:15:00" or "25:30:00" into the
-     * number of seconds since midnight of the service day. Values of 24:00:00
-     * and beyond are preserved as-is (not wrapped), which is exactly what
-     * GTFS intends.
-     *
-     * @throws IllegalArgumentException if the string is not a valid GTFS time
+     * Pretvori čas GTFS v sekunde od polnoči. Ure nad 23 ohrani.
+     * @throws IllegalArgumentException če čas ni veljaven
      */
     public static int parseToSecondsOfDay(String gtfsTime) {
         if (gtfsTime == null) {
@@ -40,10 +32,7 @@ public final class GtfsTimeUtil {
         }
     }
 
-    /**
-     * Formats a number of minutes as a short relative duration, e.g. "0min",
-     * "7min". Negative values are clamped to 0.
-     */
+    /** Oblikuje minute, npr. 7min. Negativne vrednosti prikaže kot 0min. */
     public static String formatRelativeMinutes(long minutes) {
         long clamped = Math.max(0, minutes);
         return clamped + "min";

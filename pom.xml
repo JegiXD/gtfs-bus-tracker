@@ -17,7 +17,7 @@
     </properties>
 
     <dependencies>
-        <!-- JUnit 5 for unit and integration tests -->
+        <!-- JUnit 5 za enotske in integracijske teste. -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -51,7 +51,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
-            <!-- Integration tests (class names ending in *IT) run in the verify phase -->
+            <!-- Integracijski testi (*IT) se izvedejo v fazi verify. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -65,7 +65,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Build a runnable fat/uber jar with Main-Class set -->
+            <!-- Ustvari zagonski JAR z odvisnostmi in nastavljenim glavnim razredom. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

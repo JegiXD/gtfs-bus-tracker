@@ -1,8 +1,6 @@
 package com.gtfs.bustracker.model;
 
-/**
- * Minimal representation of a GTFS route (routes.txt).
- */
+/** Osnovni podatki o liniji iz routes.txt. */
 public final class Route {
 
     private final String routeId;
@@ -27,11 +25,7 @@ public final class Route {
         return longName;
     }
 
-    /**
-     * The name that should be shown to the user: prefer the short name
-     * (e.g. a line number like "101"), fall back to the long name, and
-     * finally to the raw route id if neither is present.
-     */
+    /** Vrne kratko ime linije, sicer dolgo ime ali ID. */
     public String displayName() {
         if (shortName != null && !shortName.isBlank()) {
             return shortName;

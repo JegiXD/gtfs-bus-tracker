@@ -5,10 +5,7 @@ import com.gtfs.bustracker.model.Route;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * The upcoming arrivals for a single route at the queried stop, already
- * sorted earliest-first and limited to the requested count.
- */
+/** Prihodi ene linije, urejeni po času in omejeni na zahtevano število. */
 public final class RouteArrivals {
 
     private final Route route;

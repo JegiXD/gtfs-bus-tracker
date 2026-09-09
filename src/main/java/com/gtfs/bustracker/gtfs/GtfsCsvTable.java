@@ -11,17 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/**
- * Streams a single GTFS CSV file row by row without ever holding the whole
- * file in memory, resolving column names to fixed integer indices exactly
- * once (from the header) so each row is only parsed into a plain
- * {@code String[]} - no per-row {@code Map} allocation.
- *
- * This is the key piece of the "efficient memory usage" requirement:
- * callers decide, per file, which rows are worth keeping (e.g. only rows
- * for the requested stop_id) and everything else is discarded as soon as
- * the line is read.
- */
+/** Bere datoteko GTFS po vrsticah. Položaje stolpcev določi iz glave. */
 public final class GtfsCsvTable implements AutoCloseable {
 
     private final BufferedReader reader;
@@ -52,11 +42,7 @@ public final class GtfsCsvTable implements AutoCloseable {
         return columnIndex.containsKey(name);
     }
 
-    /**
-     * Reads every remaining row and invokes the given consumer with a
-     * {@link Row} view. The Row is only valid for the duration of the
-     * callback (it is reused/backed by the current line's fields).
-     */
+    /** Za vsako vrstico pokliče podano funkcijo. Pogled Row velja le med klicem. */
     public void forEachRow(Consumer<Row> consumer) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
@@ -73,7 +59,7 @@ public final class GtfsCsvTable implements AutoCloseable {
         reader.close();
     }
 
-    /** A lightweight, non-allocating view over one parsed CSV row. */
+    /** Pogled na polja ene vrstice CSV. */
     public static final class Row {
         private final String[] fields;
         private final Map<String, Integer> columnIndex;

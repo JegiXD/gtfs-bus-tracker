@@ -16,13 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * End-to-end integration test: invokes the same {@code Main.run} entry
- * point the packaged jar uses, against the real bundled GTFS feed on disk,
- * and checks the exact console output for a known stop/time.
- *
- * The reference date (2 March 2020) is chosen deliberately: it falls
- * inside the sample feed's calendar.txt validity window
- * (2020-02-15 .. 2020-05-15), so results are stable and reproducible.
+ * Preveri izpis celotnega programa s testnimi datotekami GTFS. Datum 2. 3. 2020 je znotraj veljavnosti voznega reda.
  */
 class BusTripsCliIT {
 
@@ -99,7 +93,7 @@ class BusTripsCliIT {
 
     @Test
     void reportsNoBusesOutsideServiceWindow() {
-        // Well past midnight with nothing scheduled in the next 2h for this feed.
+        // V naslednjih dveh urah ni predvidenih prihodov.
         Main.run(new String[]{
                 "2", "3", "absolute",
                 "--gtfs", gtfsDir.toString(),

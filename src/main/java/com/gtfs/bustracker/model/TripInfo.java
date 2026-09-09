@@ -1,10 +1,6 @@
 package com.gtfs.bustracker.model;
 
-/**
- * Minimal representation of a GTFS trip (trips.txt) - only the columns
- * needed to resolve "which route" and "which service calendar" a trip
- * belongs to.
- */
+/** Povezuje vožnjo z linijo in voznim koledarjem iz trips.txt. */
 public final class TripInfo {
 
     private final String tripId;
